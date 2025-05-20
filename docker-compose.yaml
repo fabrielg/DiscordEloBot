@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: 42pingpong_postgres
+    hostname: postgres
+    restart: always
+    env_file: .env
+    ports:
+      - "9000:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  bot:
+    build: ./bot  # (folder where your bot Dockerfile is)
+    container_name: 42pingpong_backend
+    hostname: backend
+    restart: always
+    depends_on:
+      - postgres
+    volumes:
+      - ./bot:/app
+    env_file: .env
+    networks:
+      - backend
+
+  adminer:
+    image: adminer
+    container_name: 42pingpong_adminer
+    restart: always
+    ports:
+      - "9001:8080"
+    networks:
+      - backend
+
+volumes:
+  pgdata:
+
+networks:
+  backend:
