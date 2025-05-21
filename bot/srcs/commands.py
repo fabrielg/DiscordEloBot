@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from srcs.db import db
 from srcs.member import Member
+from srcs.match import Match
 from srcs.bot import bot
 
 @bot.command()
@@ -21,7 +22,10 @@ async def refresh(ctx):
         
 @bot.command()
 async def scoreboard(ctx, ammount: int = 20):
-    members = db.query(Member).order_by(Member.elo.desc()).all()
+    subquery = db.query(Match.winner_id).union(
+        db.query(Match.looser_id)
+    ).subquery()
+    members = db.query(Member).filter(Member.id.in_(subquery)).order_by(Member.elo.desc()).all()
     embed = discord.Embed(title="Scoreboard", color=discord.Color.blue())
     
     i = 0
